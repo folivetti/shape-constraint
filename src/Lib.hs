@@ -51,7 +51,7 @@ toTuple k = (fromMaybe (-1/0) $ inf k, fromMaybe (1/0) $ sup k)
 {-# INLINE toTuple #-}
 
 eps :: Double
-eps = 1e-16
+eps = 1e-6
 {-# INLINE eps #-}
 
 calcPenalty :: Bool -> Double -> Double
@@ -59,8 +59,8 @@ calcPenalty b pnlty = bool 0 pnlty b
 {-# INLINE calcPenalty #-}
 
 inRng (a, b) (x, y) = calcPenalty (x < a - eps) (a - x) + calcPenalty (y > b + eps) (y - b)
-isPositive (x, y)   = calcPenalty (x <= eps) (abs x) + calcPenalty (y <= eps) (abs y)
-isNegative (x, y)   = calcPenalty (x >= -eps) (abs x) + calcPenalty (y >= -eps) (abs y)
+isPositive (x, y)   = calcPenalty (x <= -eps) (abs x) + calcPenalty (y <= -eps) (abs y)
+isNegative (x, y)   = calcPenalty (x >= eps) (abs x) + calcPenalty (y >= eps) (abs y)
 isZero (x, y)       = calcPenalty (x <= -eps) (abs x) + calcPenalty (y >= eps) y 
 
 evalConstraints :: Shape -> (Double, Double) -> Double

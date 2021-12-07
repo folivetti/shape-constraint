@@ -25,20 +25,20 @@ expr1 = (1 / (1 + x^.(-4))) + (1 / (1 + y^.(-4)))
 expr2 = (x^.4 + y^.4 + 2*x^.4 * y^.4) / (1 + x^.4 + y^.4 + 2*x^.4 * y^.4)
 expr3 = exp((-(theta/sigma)^.2)/2)/(sqrt(2*pi)*sigma)
 
-viol1 = getViolationFun InnerInterval shapes 
-viol2 = getViolationFun OuterInterval shapes
-viol3 = getViolationFun (Sampling 1000) shapes 
+viol1 = getViolationFun InnerInterval 
+viol2 = getViolationFun OuterInterval 
+viol3 = getViolationFun (Sampling 1000) 
 
 main :: IO ()
 main = do
-    print $ viol1 domains expr1
-    print $ viol2 domains expr1
-    print $ viol3 domains expr1
+    print $ viol1 shapes domains expr1
+    print $ viol2 shapes domains expr1
+    print $ viol3 shapes domains expr1
 
-    print $ viol1 domains expr2
-    print $ viol2 domains expr2
-    print $ viol3 domains expr2
+    print $ viol1 shapes domains expr2
+    print $ viol2 shapes domains expr2
+    print $ viol3 shapes domains expr2
 
-    print $ viol1 domains2 expr3
-    print $ viol2 domains2 expr3
-    print $ viol3 domains2 expr3
+    print $ viol1 shapes2 domains2 expr3
+    print $ viol2 shapes2 domains2 expr3
+    print $ viol3 shapes2 domains2 expr3
