@@ -1,8 +1,8 @@
-module Lib
---    ( getViolationFun
---    , Evaluator(..)
---    , Shape(..)
---    ) 
+module Algorithm.ShapeConstraint
+    ( getViolationFun
+    , Evaluator(..)
+    , Shape(..)
+    ) 
       where
 
 import Numeric.ModalInterval

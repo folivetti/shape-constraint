@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Algorithm.ShapeConstraint
 import Data.SRTree 
 
 x = Var 0 

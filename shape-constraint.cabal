@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Algorithm.ShapeConstraint
   other-modules:
       Paths_shape_constraint
   hs-source-dirs:
