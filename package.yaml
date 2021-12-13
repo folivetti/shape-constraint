@@ -25,6 +25,7 @@ dependencies:
 - srtree 
 - containers
 - vector
+- hmatrix 
 library:
   source-dirs: src
 
