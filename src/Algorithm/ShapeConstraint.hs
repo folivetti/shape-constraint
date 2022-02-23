@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE BangPatterns #-}
 module Algorithm.ShapeConstraint
     ( getViolationFun
     , Evaluator(..)
@@ -100,15 +101,16 @@ getViolationFun InnerInterval shapes domains t = f
               cnstrs   = zipWith evalConstraints shapes rngs
           in  sum cnstrs
 
-getViolationFun OuterInterval shapes domains t = go ts domains' shapes
+getViolationFun OuterInterval shapes domains t = go ts domains' shapes 0.0
   where
     toMap    = M.fromList . zip [0..]
     domains' = map (toMap . (\s -> zipWith (convertDomains s) domains [0..])) shapes
     t'       = fmap singleton t
     ts       = map (t' `ofShape`) shapes
     
-    go [] [] []             = 0.0
-    go (x:xs) (y:ys) (z:zs) = (evalConstraints z $ toTuple $ outerApprox x y) + go xs ys zs
+    go [] [] []             !acc = acc
+    go (x:xs) (y:ys) (z:zs) !acc = go xs ys zs (acc + cnstr)
+      where cnstr = evalConstraints z $ toTuple $ outerApprox x y
 
 
 getViolationFun (Sampling nSamples) shapes domains t = f
