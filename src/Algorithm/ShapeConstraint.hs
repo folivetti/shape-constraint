@@ -16,7 +16,6 @@ import qualified Data.Vector as V
 import Data.Bool (bool)
 import Data.Maybe (fromMaybe)
 import qualified Numeric.LinearAlgebra.Data as LA
-import Numeric.LinearAlgebra (Container, Element) 
 
 data Shape   = Range (Double, Double)                     -- f(x) \in [a, b]
              | DiffRng Int (Double, Double)               -- d f(x) / dx \in [a, b]
@@ -38,7 +37,7 @@ type ConstraintFun = SRTree Int Double -> Double
 type Domains       = [(Double, Double)]
 type KDomains      = Map (Kaucher Double)
 
-ofShape :: SRTree Int Double -> Shape -> SRTree Int Double
+ofShape :: (Floating a, Eq a, OptIntPow a) => SRTree Int a -> Shape -> SRTree Int a
 t `ofShape` Range _ = t
 t `ofShape` DiffRng ix _ = simplify $ deriveBy ix t
 t `ofShape` NonIncreasing ix = simplify $ deriveBy ix t
@@ -48,6 +47,7 @@ t `ofShape` PartialNonDecreasing ix _ = simplify $ deriveBy ix t
 t `ofShape` Inflection ix iy = simplify $ deriveBy iy $ simplify $ deriveBy ix t
 t `ofShape` Convex ix iy = simplify $ deriveBy iy $ simplify $ deriveBy ix t
 t `ofShape` Concave ix iy = simplify $ deriveBy iy $ simplify $ deriveBy ix t
+{-# INLINE ofShape #-}
 
 toTuple :: Kaucher Double -> (Double, Double)
 toTuple k = (fromMaybe (-1/0) $ inf k, fromMaybe (1/0) $ sup k)
@@ -89,27 +89,29 @@ convertDomains _ (a, b) _ = a <.< b
 {-# INLINE convertDomains #-}
 
 getViolationFun :: Evaluator -> [Shape] -> Domains -> ConstraintFun
-getViolationFun InnerInterval shapes domains = f
+getViolationFun InnerInterval shapes domains t = f 
   where
     toMap    = M.fromList . zip [0..]
     domains' = map (toMap . (\s -> zipWith (convertDomains s) domains [0..])) shapes
+    t'       = fmap singleton t
 
-    f t = let ts       = map (fmap singleton . (t `ofShape`)) shapes
+    f   = let ts       = map (t' `ofShape`) shapes
               rngs     = map toTuple $ zipWith innerApprox ts domains'
               cnstrs   = zipWith evalConstraints shapes rngs
           in  sum cnstrs
 
-getViolationFun OuterInterval shapes domains = f
+getViolationFun OuterInterval shapes domains t = go ts domains' shapes
   where
     toMap    = M.fromList . zip [0..]
     domains' = map (toMap . (\s -> zipWith (convertDomains s) domains [0..])) shapes
+    t'       = fmap singleton t
+    ts       = map (t' `ofShape`) shapes
+    
+    go [] [] []             = 0.0
+    go (x:xs) (y:ys) (z:zs) = (evalConstraints z $ toTuple $ outerApprox x y) + go xs ys zs
 
-    f t = let ts       = map (fmap singleton . (t `ofShape`)) shapes
-              rngs     = map toTuple $ zipWith outerApprox ts domains'
-              cnstrs   = zipWith evalConstraints shapes rngs
-          in  sum cnstrs
 
-getViolationFun (Sampling nSamples) shapes domains = f
+getViolationFun (Sampling nSamples) shapes domains t = f
   where
     toMap    = M.fromList . zip [0..]
     samples  = map (toMap . makeSamples nSamples . (\s -> zipWith (convertDomains s) domains [0..])) shapes
@@ -120,13 +122,13 @@ getViolationFun (Sampling nSamples) shapes domains = f
         mmax = LA.maxElement <$> mxs
         mmin = LA.minElement <$> mxs
 
-    f t = let getSize s = LA.size $ s M.! 0
+    f   = let getSize s = LA.size $ s M.! 0
               ts        = zipWith (\shape s -> LA.fromList . replicate (getSize s) <$> (t `ofShape` shape)) shapes samples
               rngs      = zipWith (\t s -> evalSamples $ evalTreeWithMap t s) ts samples
               cnstrs    = zipWith evalConstraints shapes rngs
           in  sum cnstrs
 
-getViolationFun e shapes domains = error $ show e <> " evaluator not implemented"
+getViolationFun e shapes domains t = error $ show e <> " evaluator not implemented"
 
 instance OptIntPow (LA.Vector Double) where 
     (^.) = (^^)
