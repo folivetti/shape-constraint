@@ -92,8 +92,9 @@ go f ds [] []         acc = acc
 go f ds (x:xs) (z:zs) acc = go f ds xs zs (acc + cnstr)
    where 
      cnstr = evalConstraints z $ toTuple $ f x $ convertDomains z ds
+{-# INLINE go #-}
 toMap    = M.fromList . zip [0..] . map (uncurry (<.<))
-      
+{-# INLINE toMap #-}
 getViolationFun :: Evaluator -> [Shape] -> Domains -> ConstraintFun
 getViolationFun InnerInterval shapes domains t = go innerApprox ds ts shapes 0.0 
   where
