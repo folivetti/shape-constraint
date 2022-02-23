@@ -83,59 +83,66 @@ evalConstraints (Concave _ _) xy              = isNegative xy
 {-# INLINE evalConstraints #-}
 
 -- convertDomains :: Shape -> (Double, Double) -> Int -> Kaucher Double
+convertDomains :: Shape -> Map Int (Kaucher Double) -> Map Int (Kaucher Double)
 convertDomains (PartialNonIncreasing ix (a, b)) ds = M.insert ix (a <.< b) ds
 convertDomains (PartialNonDecreasing ix (a, b)) ds = M.insert ix (a <.< b) ds 
 convertDomains _ ds = ds
 {-# INLINE convertDomains #-}
 
-go f ds [] []         acc = acc
-go f ds (x:xs) (z:zs) acc = go f ds xs zs (acc + cnstr)
+sumCnstr :: (SRTree Int (Kaucher Double) -> Map Int (Kaucher Double) -> Kaucher Double) -> Map Int (Kaucher Double) -> [SRTree Int (Kaucher Double)] -> [Shape] -> Double -> Double
+sumCnstr f ds [] []         acc = acc
+sumCnstr f ds (x:xs) (z:zs) acc = sumCnstr f ds xs zs (acc + cnstr)
    where 
      cnstr = evalConstraints z $ toTuple $ f x $ convertDomains z ds
-{-# INLINE go #-}
+{-# INLINE sumCnstr #-}
+
+toMap :: Domains -> Map Int (Kaucher Double)
 toMap    = M.fromList . zip [0..] . map (uncurry (<.<))
 {-# INLINE toMap #-}
+
 getViolationFun :: Evaluator -> [Shape] -> Domains -> ConstraintFun
-getViolationFun InnerInterval shapes domains t = go innerApprox ds ts shapes 0.0 
+getViolationFun InnerInterval shapes domains t = sumCnstr innerApprox ds ts shapes 0.0 
   where
     t'       = fmap singleton t
     ts       = map (t' `ofShape`) shapes
     ds       = toMap domains
 
-getViolationFun OuterInterval shapes domains t = go outerApprox ds ts shapes 0.0
+getViolationFun OuterInterval shapes domains t = sumCnstr outerApprox ds ts shapes 0.0
   where
     t'       = fmap singleton t
     ts       = map (t' `ofShape`) shapes
     ds       = toMap domains
-{-    
-getViolationFun (Sampling nSamples) shapes domains t = f
-  where
-    ds       = toMap domains    
-    samples  = map (makeSamples nSamples . (`convertDomains` ds)) shapes
 
+getViolationFun (Sampling nSamples) shapes domains t = go shapes ts samples 0.0
+  where
+    ds        = toMap domains    
+    samples   = map (M.fromList . zip [0..] . makeSamples nSamples . (`convertDomains` ds)) shapes
+    getSize s = LA.size $ s M.! 0
+    ts        = map (t `ofShape`) shapes
+        
     evalSamples :: Maybe (LA.Vector Double) -> (Double, Double)
     evalSamples mxs = (fromMaybe (-1/0) mmin, fromMaybe (1/0) mmax)
       where
         mmax = LA.maxElement <$> mxs
         mmin = LA.minElement <$> mxs
+    
+    go [] _ _               acc = acc 
+    go (x:xs) (y:ys) (z:zs) acc = go xs ys zs (acc + cnstr)
+      where 
+        cnstr = evalConstraints x rng
+        y'    = fmap (LA.fromList . replicate (getSize z)) y
+        rng   = evalSamples $ evalTreeWithMap y' z
 
-    f   = let getSize s = LA.size $ s M.! 0
-              ts        = zipWith (\shape s -> LA.fromList . replicate (getSize s) <$> (t `ofShape` shape)) shapes samples
-              rngs      = zipWith (\t s -> evalSamples $ evalTreeWithMap t s) ts samples
-              cnstrs    = zipWith evalConstraints shapes rngs
-          in  sum cnstrs
--}
 getViolationFun e shapes domains t = error $ show e <> " evaluator not implemented"
 
 instance OptIntPow (LA.Vector Double) where 
     (^.) = (^^)
     {-# INLINE (^.) #-}
-{-
+
 makeSamples :: Int -> Map Int (Kaucher Double) -> [LA.Vector Double]
 makeSamples n domains = LA.toColumns $ LA.fromLists $ map (map midpoint) $ head $ dropWhile (\x -> length x < n) samples
   where
     step x  = let (a,b) = bisect x in [a,b]
     f       = map (concatMap step)
-    samples = map sequence $ iterate f $ map pure domains
+    samples = map sequence $ iterate f $ map (pure.snd) $ M.toAscList domains
 {-# INLINE makeSamples #-}
--}
