@@ -10,22 +10,22 @@ packages:
     git: https://github.com/folivetti/srtree.git
     pantry-tree:
       size: 817
-      sha256: 94e90a962e7dd66a28c05cd2c6e52ff810edbe970377341920f9dce8acd2ece3
-    commit: db83f1573a72da27e4755133116305e3e44f24bf
+      sha256: bc96f6fba1d20b5537a961578e53e23be8b5500dcb359d49965541c4b6e18810
+    commit: 2b376f6d7a9cacf65978e9f8718c3c0d330b4cba
   original:
     git: https://github.com/folivetti/srtree.git
-    commit: db83f1573a72da27e4755133116305e3e44f24bf
+    commit: 2b376f6d7a9cacf65978e9f8718c3c0d330b4cba
 - completed:
     name: modal-interval
     version: 0.1.0.0
     git: https://github.com/folivetti/modal-interval.git
     pantry-tree:
       size: 950
-      sha256: 7dd180da8dc96f09d20a3dec3527074f5477d00f3208c49aaa0ce1d2e450290f
-    commit: 255fcba080da9a758e7f535bfff2ed333541de36
+      sha256: 742fc6a721c8a3cf3eb3c7edb26b9acb148d162ef8daee04b03ca8150312815d
+    commit: d43ec184314c2bb61aa8bbb974866d68d14b2e45
   original:
     git: https://github.com/folivetti/modal-interval.git
-    commit: 255fcba080da9a758e7f535bfff2ed333541de36
+    commit: d43ec184314c2bb61aa8bbb974866d68d14b2e45
 snapshots:
 - completed:
     size: 586296
