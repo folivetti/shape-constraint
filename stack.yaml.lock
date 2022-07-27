@@ -10,11 +10,11 @@ packages:
     git: https://github.com/folivetti/srtree.git
     pantry-tree:
       size: 817
-      sha256: bc96f6fba1d20b5537a961578e53e23be8b5500dcb359d49965541c4b6e18810
-    commit: 2b376f6d7a9cacf65978e9f8718c3c0d330b4cba
+      sha256: b15f4d901e58a1caa77b6086fcba31aa7da8aee37c30da59c44fcf6cb956361e
+    commit: 332cc55c3f1807edf78966105eba25afd784bb9a
   original:
     git: https://github.com/folivetti/srtree.git
-    commit: 2b376f6d7a9cacf65978e9f8718c3c0d330b4cba
+    commit: 332cc55c3f1807edf78966105eba25afd784bb9a
 - completed:
     name: modal-interval
     version: 0.1.0.0

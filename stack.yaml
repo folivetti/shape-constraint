@@ -43,7 +43,7 @@ packages:
 # extra-deps: []
 extra-deps:
   - git: https://github.com/folivetti/srtree.git
-    commit: 2b376f6d7a9cacf65978e9f8718c3c0d330b4cba
+    commit: 332cc55c3f1807edf78966105eba25afd784bb9a
   - git: https://github.com/folivetti/modal-interval.git
     commit: 191689d30f77866a5952e4bfedb06eaa10ba5e75
 # Override default flag values for local packages and extra-deps
