@@ -80,7 +80,7 @@ data Shape   = Range (Double, Double)                     -- ^ f(x) \in [a, b]
 -- * Sampling can result in false positives and usually requires a lot of samples
 -- * Hybrid - not yet implemented
 -- * Bisection can improve the results of OuterInterval
-data Evaluator = InnerInterval | OuterInterval | Sampling Int | Hybrid | Bisection Int
+data Evaluator = InnerInterval | OuterInterval | Kaucher | Sampling Int | Hybrid Double | Bisection Int
                    deriving (Show, Read)
 
 -- | Function that calculates how much of the constraints a symbolic tree vioaltes
@@ -172,6 +172,21 @@ getViolationFun OuterInterval shapes domains t = sumCnstr outerApprox ds ts shap
     t'       = fmap singleton t
     ts       = map (t' `ofShape`) shapes
     ds       = toMap domains
+
+getViolationFun Kaucher shapes domains t = sumCnstr evalKaucher ds ts shapes 0.0
+  where
+    t'       = fmap singleton t
+    ts       = map (t' `ofShape`) shapes
+    ds       = toMap domains
+
+getViolationFun (Hybrid pmax) shapes domains t 
+  | cnstrInner > 0.0  = pmax 
+  | cnstrOuter == 0.0 = 0.0 
+  | otherwise         = pmax * (cnstrOuter / cnstrKauch)
+    where 
+        cnstrInner = getViolationFun InnerInterval shapes domains t 
+        cnstrOuter = getViolationFun OuterInterval shapes domains t 
+        cnstrKauch = getViolationFun Kaucher shapes domains t 
 
 getViolationFun (Sampling nSamples) shapes domains t = go shapes ts samples 0.0
   where

@@ -20,12 +20,12 @@ packages:
     version: 0.1.0.0
     git: https://github.com/folivetti/modal-interval.git
     pantry-tree:
-      size: 950
-      sha256: 742fc6a721c8a3cf3eb3c7edb26b9acb148d162ef8daee04b03ca8150312815d
-    commit: d43ec184314c2bb61aa8bbb974866d68d14b2e45
+      size: 2101
+      sha256: b41c9d4691d749380dc0b4a301c8edf31da4af0ed29ed766bfb393b3907f1a09
+    commit: 191689d30f77866a5952e4bfedb06eaa10ba5e75
   original:
     git: https://github.com/folivetti/modal-interval.git
-    commit: d43ec184314c2bb61aa8bbb974866d68d14b2e45
+    commit: 191689d30f77866a5952e4bfedb06eaa10ba5e75
 snapshots:
 - completed:
     size: 586296
