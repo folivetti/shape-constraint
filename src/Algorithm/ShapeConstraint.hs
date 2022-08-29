@@ -182,11 +182,14 @@ getViolationFun Kaucher shapes domains t = sumCnstr evalKaucher ds ts shapes 0.0
 getViolationFun (Hybrid pmax) shapes domains t 
   | cnstrInner > 0.0  = pmax 
   | cnstrOuter == 0.0 = 0.0 
-  | otherwise         = pmax * (cnstrOuter / cnstrKauch)
+  | otherwise         = 0.5 * pmax * maxViol/cnstrOuter + 0.5 * pmax * minViol/cnstrOuter -- (cnstrOuter / cnstrKauch)
     where 
         cnstrInner = getViolationFun InnerInterval shapes domains t 
         cnstrOuter = getViolationFun OuterInterval shapes domains t 
         cnstrKauch = getViolationFun Kaucher shapes domains t 
+        bisectedDomains = sequence [ [(lo, mid), (mid, hi)] | (lo, hi) <- domains, let mid = (hi-lo) / 2]
+        bisectedOuters = let f = getViolationFun OuterInterval shapes in map (`f` t) bisectedDomains
+        (maxViol, minViol) = (maximum bisectedOuters, minimum bisectedOuters) 
 
 getViolationFun (Sampling nSamples) shapes domains t = go shapes ts samples 0.0
   where
